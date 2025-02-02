@@ -1,6 +1,7 @@
 { stdenv,
   fetchurl,
   lib,
+  makeWrapper,
   autoPatchelfHook,
   dpkg,
   patchelf,
@@ -28,16 +29,17 @@
 
 stdenv.mkDerivation rec {
   pname = "lark";
-  version = "7.32.1";
+  version = "7.32.11";
   src = fetchurl {
-    url = "https://sf16-va.larksuitecdn.com/obj/lark-artifact-storage/355bee5d/Lark-linux_x64-${version}.deb";
-    sha256 = "sha256-DePiEOkaFJDobYABOpKVeoXF1xR6nq+M0jDh5cuj4pg=";
+    url = "https://sf16-va.larksuitecdn.com/obj/lark-artifact-storage/afc02e52/Lark-linux_x64-${version}.deb";
+    sha256 = "sha256-hfLKbKzZzOYqNGEoLw4gMXI2jfNvtFPU7hAODeA9SxU=";
   };
 
   nativeBuildInputs = [
     autoPatchelfHook
     dpkg
     patchelf
+    makeWrapper
   ];
 
   buildInputs = [
@@ -76,8 +78,6 @@ stdenv.mkDerivation rec {
     runHook postUnpack
   '';
 
-  # TODO: make binary work without throw segfault and error
-  # by manually patchelf or something like that
   installPhase = ''
     runHook preInstall
 
@@ -88,13 +88,6 @@ stdenv.mkDerivation rec {
     ln -s $out/opt/bytedance/lark/lark $out/bin/lark
 
     runHook postInstall
-  '';
-
-  # Use postFixup patchelf or makeWrapper to make it work no other way
-  postFixup = ''
-    makeWrapper --
-    #patchelf $out/opt/bytedance/lark/lark \
-    #  --add-rpath ${lib.makeLibraryPath [ libGL ]}
   '';
 
   meta = with lib; {
